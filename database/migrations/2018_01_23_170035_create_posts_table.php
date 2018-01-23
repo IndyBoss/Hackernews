@@ -17,13 +17,10 @@ class CreatePostsTable extends Migration
             $table->increments('post_id');
             $table->string('title');
             $table->string('url');
-            $table->integer('user_id');
+            $table->integer('user_id')->unsigned();
             $table->timestamps();
         });
 
-        Schema::table('posts', function($table) {
-            $table->foreign('user_id')->references('user_id')->on('users');
-        });
     }
 
     /**
