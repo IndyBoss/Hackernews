@@ -2,80 +2,115 @@
 
 @section('content')
 
-<?php
+    <?php
 
-$titleValue = "";
-$urlValue = "";
+    $titleValue = "";
+    $urlValue = "";
+    $postedByID = "";
 
-if($title = 'Edit') {
+    if($title == 'Edit') {
 
-    $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-    $sql = 'SELECT * FROM posts WHERE post_id=' . $number;
+        $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
+        $sql = 'SELECT * FROM posts WHERE post_id=' . $number;
 
-    foreach ($conn->query($sql) as $row) {
-        $titleValue =  $row['title'];
-        $urlValue = $row['url'];
+        foreach ($conn->query($sql) as $row) {
+            $titleValue =  $row['title'];
+            $urlValue = $row['url'];
+            $postedByID = $row['user_id'];
+        }
     }
-}
 
-?>
+    ?>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-
-             <div class="breadcrumb">
+    @if ($postedByID == Auth::user()->id)
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
                 
-                <a href="/">← back to overview</a>
+                    @if($delete == 'yes')
+                        <div class="bg-danger clearfix">             
+                            Are you sure you want to delete this article? 
 
-            </div>
-            
-            <div class="panel panel-default">
-                <div class="panel-heading"><?php echo $title; ?> article</div>
+                            <form action="/home" method="POST" class="pull-right">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="function" value="Delete">
+                                <input type="hidden" name="post_id" value="<?php echo $number; ?>">
 
-                <div class="panel-content">
-                    
-                    
-
-                    <!-- New Task Form -->
-                    <form action="/home" method="POST" class="form-horizontal">
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="function" value="<?php echo $title; ?>">
-
-                        <!-- Article data -->
-                        <div class="form-group">
-                            <label for="article-title" class="col-sm-3 control-label">Title (max. 255 characters)</label>
-
-                            <div class="col-sm-6">
-                                <input type="text" name="title" id="article-title" class="form-control" value="<?php if($title == 'Edit') {echo $titleValue;}?>">
-                            </div>
-                        </div>
-
-                        
-                        <!-- Article url -->
-                        <div class="form-group">
-                            <label for="article-url" class="col-sm-3 control-label">URL</label>
-
-                            <div class="col-sm-6">
-                                <input type="text" name="url" id="article-url" class="form-control" value="<?php if($title == 'Edit') {echo $urlValue;}?>">
-                            </div>
-                        </div>
-
-
-                        <!-- Add Article Button -->
-                        <div class="form-group">
-                            <div class="col-sm-offset-3 col-sm-6">
-                                <button type="submit" class="btn btn-default">
-                                    <?php echo $title;?> Article
+                                <button name="button" class="btn btn-danger" value="delete">
+                                    <i class="fa fa-btn fa-trash" title="delete"></i> confirm delete
                                 </button>
-                            </div>
+
+                                <a href="/public/article/edit/<?php echo $number; ?>" class="btn">
+                                    <i class="fa fa-btn fa-trash" title="delete"></i> cancel
+                                </a>
+
+                            </form>
                         </div>
-                    </form>
+                    @endif
+
+                    <div class="breadcrumb">
+                        
+                        <a href="/">← back to overview</a>
+
+                    </div>
+                    
+                    <div class="panel panel-default">
+                        <div class="panel-heading clearfix">
+                            <?php echo $title; ?> article
+
+                            <a href="/public/article/delete/<?php if($title == 'Edit') {echo $number;}?>" class="btn btn-danger btn-xs pull-right">
+                                <i class="fa fa-btn fa-trash" title="delete"></i> delete article
+                            </a>
+                        </div>
+
+                        <div class="panel-content">
+                            
+                            
+
+                            <!-- New Task Form -->
+                            <form action="/home" method="POST" class="form-horizontal">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="function" value="<?php echo $title; ?>">
+                                <input type="hidden" name="post_id" value="<?php if($title == 'Edit') {echo $number;}?>>">
+
+
+                                <!-- Article data -->
+                                <div class="form-group">
+                                    <label for="article-title" class="col-sm-3 control-label">Title (max. 255 characters)</label>
+
+                                    <div class="col-sm-6">
+                                        <input type="text" name="title" id="article-title" class="form-control" value="<?php if($title == 'Edit') {echo $titleValue;}?>">
+                                    </div>
+                                </div>
+
+                                
+                                <!-- Article url -->
+                                <div class="form-group">
+                                    <label for="article-url" class="col-sm-3 control-label">URL</label>
+
+                                    <div class="col-sm-6">
+                                        <input type="text" name="url" id="article-url" class="form-control" value="<?php if($title == 'Edit') {echo $urlValue;}?>">
+                                    </div>
+                                </div>
+
+
+                                <!-- Add Article Button -->
+                                <div class="form-group">
+                                    <div class="col-sm-offset-3 col-sm-6">
+                                        <button type="submit" class="btn btn-default">
+                                            <?php echo $title;?> Article
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
 
                 </div>
             </div>
-
         </div>
-    </div>
-</div>
+    @else
+    <h1>This is not your article.</h>
+    @endif
 @endsection

@@ -63,7 +63,11 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/public/article/edit/{post}', function($post)
     {
-        return View::make('article', array('title' => 'Edit','link' => '/article/edit', 'number' => $post));
+        return View::make('article', array('title' => 'Edit', 'delete' => 'no', 'link' => '/article/edit', 'number' => $post));
+    });
+    Route::get('/public/article/delete/{post}', function($post)
+    {
+        return View::make('article', array('title' => 'Edit', 'delete' => 'yes', 'number' => $post));
     });
 });
 

@@ -4,7 +4,10 @@
 
 <?php $postedById = 0; ?>
 
-@if($postedById = Auth::user()->id)
+
+@if (null !== Auth::user())
+    @if ($postedById = Auth::user()->id)
+    @endif
 @endif
 
 
@@ -12,12 +15,12 @@
 
 <?php
 
-$MSG = null;
+$MSG = "";
 
 if (isset($_POST['function'])) {
-    $title = $_POST['title'];
-    $url = $_POST['url'];
-    if($_POST['function']=='Add'){
+    if($_POST['function'] =='Add'){
+        $title = $_POST['title'];
+        $url = $_POST['url'];
         try 
         {
             $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
@@ -25,30 +28,53 @@ if (isset($_POST['function'])) {
             $sql = "INSERT INTO posts (title, url, user_id)
         VALUES ('$title', '$url', '$postedById')";
             $conn->exec($sql);
-            $MSG = "article" . '"' . $title . '"' . "created succesfully.";
+            $MSG = "Article" . '"' . $title . '"' . "created succesfully.";
         }
         catch(PDOException $e)
         {
-            $MSG = "article" . '"' . $title . '"' . "failed creating. " . $e->getMessage() . "";
+            $MSG = "Article" . '"' . $title . '"' . "failed creating. " . $e->getMessage() . "";
         }
 
         $conn = null;
     }
-    if($_POST['function']=='Edit'){
+    if($_POST['function'] =='Edit'){
+        $title = $_POST['title'];
+        $url = $_POST['url'];
+        $postID = $_POST['post_id'];
         try 
         {
             $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "UPDATE posts SET title = '$title', url = '$url' WHERE title = '$title' ";
+            $sql = "UPDATE posts SET title = '$title', url = '$url' WHERE post_id = '$postID' ";
             $conn->exec($sql);
-            $MSG = "article" . '"' . $title . '"' . "edited succesfully.";
+            $MSG = "Article" . '"' . $title . '"' . "edited succesfully.";
         }
         catch(PDOException $e)
         {
-            $MSG = "article" . '"' . $title . '"' . "failed editing. " . $e->getMessage() . "";
+            $MSG = "Article" . '"' . $title . '"' . "failed editing. " . $e->getMessage() . "";
         }
 
         $conn = null;
+    }
+    if($_POST['function'] == 'Delete'){
+        $postID = $_POST['post_id'];
+        $button = $_POST['button'];
+        if($button == 'delete') {
+            try 
+            {
+                $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
+                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $sql = "DELETE FROM posts WHERE post_id = '$postID' ";
+                $conn->exec($sql);
+                $MSG = "Article" . '"' . $title . '"' . "deleted succesfully.";
+            }
+            catch(PDOException $e)
+            {
+                $MSG = "Article" . '"' . $title . '"' . "failed deleting. " . $e->getMessage() . "";
+            }
+    
+            $conn = null;
+        }
     }
 }
 
@@ -63,7 +89,7 @@ if (isset($_POST['function'])) {
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
 
-        <div class='bg-success'><?php echo "".(null !== $MSG ?   $MSG : "") ?></div>
+        <?php if($MSG !== "") {echo "<div class='bg-success'>" .$MSG. "</div>";} ?>
 
             <div class="panel panel-default">
                 <div class="panel-heading">Article overview</div>
@@ -105,7 +131,7 @@ if (isset($_POST['function'])) {
                             <a href="<?= $post['url'] ?>" class="urlTitle"><?= $post['title'] ?></a>
                             @if (null !== Auth::user())
                                 @if ($postedById == Auth::user()->id)
-                                <a href="public/article/edit/<?php echo $post['post_id'];?>" class="btn btn-primary btn-xs edit-btn">edit</a>
+                                <a href="/public/article/edit/<?php echo $post['post_id'];?>" class="btn btn-primary btn-xs edit-btn">edit</a>
                                 @endif
                             @endif
 
