@@ -1,13 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
+
+<?php
+
+$titleValue = "";
+$urlValue = "";
+
+if($title = 'Edit') {
+
+    $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
+    $sql = 'SELECT * FROM posts WHERE post_id=' . $number;
+
+    foreach ($conn->query($sql) as $row) {
+        $titleValue =  $row['title'];
+        $urlValue = $row['url'];
+    }
+}
+
+?>
+
 <div class="container">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-
-            <!-- Display Validation Errors -->
-            <!-- resources/views/common/errors.blade.php -->
-
 
              <div class="breadcrumb">
                 
@@ -23,9 +38,9 @@
                     
 
                     <!-- New Task Form -->
-                    <form action="/article/add" method="POST" class="form-horizontal">
-                        <input type="hidden" name="_method" value="PUT">
+                    <form action="/home" method="POST" class="form-horizontal">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="function" value="<?php echo $title; ?>">
 
                         <!-- Article data -->
                         <div class="form-group">

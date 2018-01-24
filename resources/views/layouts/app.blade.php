@@ -29,7 +29,7 @@
                     </button>
 
                     <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
+                    <a class="navbar-brand" href="{{ url('/public') }}">
                     Hackernews.local
                     </a>
                 </div>
@@ -38,12 +38,12 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
                     @guest
-                        <li><a href="/home">Home</a></li>
+                        <li><a href="/public/home">Home</a></li>
                         <li><a href="/public/instructies">Instructies</a></li>
                     @else
                         <li><a href="/public/home">Home</a></li>
                         <li><a href="/public/article/add">Add article</a></li>
-                        <li><a href="/instructies">Instructies</a></li>
+                        <li><a href="/public/instructies">Instructies</a></li>
                     @endguest
                     </ul>
 

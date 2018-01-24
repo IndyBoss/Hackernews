@@ -39,15 +39,21 @@ Route::get('/', function () {
     return view('home');
 });
 
+
+
+
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/article/add', function()
+    Route::post('/home', function () {
+        return view('home');
+    });
+    Route::post('/article/add', function()
     {
-        return view('/article/add');
+        return view('article.add');
     });
 
-    Route::get('/article/edit', function()
+    Route::post('/article/edit', function()
     {
-        return view('/article/edit');
+        return view('article.edit');
     });
 
     Route::get('/public/article/add', function()
@@ -57,7 +63,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/public/article/edit/{post}', function($post)
     {
-        return View::make('article', array('title' => 'Edit','link' => '/article/edit', 'post' => $post));
+        return View::make('article', array('title' => 'Edit','link' => '/article/edit', 'number' => $post));
     });
 });
 

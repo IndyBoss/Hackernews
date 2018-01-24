@@ -2,14 +2,59 @@
 
 @section('content')
 
+<?php $postedById = 0; ?>
+
+@if($postedById = Auth::user()->id)
+@endif
+
+
+
+
 <?php
 
+$MSG = null;
+
+if (isset($_POST['function'])) {
+    $title = $_POST['title'];
+    $url = $_POST['url'];
+    if($_POST['function']=='Add'){
+        try 
+        {
+            $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "INSERT INTO posts (title, url, user_id)
+        VALUES ('$title', '$url', '$postedById')";
+            $conn->exec($sql);
+            $MSG = "article" . '"' . $title . '"' . "created succesfully.";
+        }
+        catch(PDOException $e)
+        {
+            $MSG = "article" . '"' . $title . '"' . "failed creating. " . $e->getMessage() . "";
+        }
+
+        $conn = null;
+    }
+    if($_POST['function']=='Edit'){
+        try 
+        {
+            $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $sql = "UPDATE posts SET title = '$title', url = '$url' WHERE title = '$title' ";
+            $conn->exec($sql);
+            $MSG = "article" . '"' . $title . '"' . "edited succesfully.";
+        }
+        catch(PDOException $e)
+        {
+            $MSG = "article" . '"' . $title . '"' . "failed editing. " . $e->getMessage() . "";
+        }
+
+        $conn = null;
+    }
+}
+
     session_start();
-
     $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-
     $sql = 'SELECT * FROM posts';
-
 ?>
 
 
@@ -18,7 +63,8 @@
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
 
-            
+        <div class='bg-success'><?php echo "".(null !== $MSG ?   $MSG : "") ?></div>
+
             <div class="panel panel-default">
                 <div class="panel-heading">Article overview</div>
 
@@ -28,12 +74,12 @@
 
                 <?php foreach ( $conn->query($sql) as $post): 
                 
-                $usersql = 'SELECT * FROM users WHERE id=' . $post['post_id'];
+                $usersql = 'SELECT * FROM users WHERE id=' . $post['user_id'];
 
-                    foreach ( $conn->query($usersql) as $user):
+                    foreach ( $conn->query($usersql) as $user){
                         $postedBy =  $user['name'];
                         $postedById = $user['id'];
-                    endforeach;
+                    }
 
                 ?>
                     <li>
