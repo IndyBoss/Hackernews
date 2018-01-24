@@ -8,17 +8,15 @@
     $urlValue = "";
     $postedByID = Auth::user()->id;
 
-    if($title == 'Edit') {
 
         $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-        $sql = 'SELECT * FROM posts WHERE post_id=' . $number;
+        $sql = 'SELECT * FROM comments WHERE comment_id=' . $number;
 
         foreach ($conn->query($sql) as $row) {
             $titleValue =  $row['title'];
             $urlValue = $row['url'];
             $postedByID = $row['user_id'];
         }
-    }
 
     ?>
 
@@ -26,15 +24,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-10 col-md-offset-1">
-                    @if($title == 'Edit')
                         @if($delete == 'yes')
                             <div class="bg-danger clearfix">             
-                                Are you sure you want to delete this article? 
+                                Are you sure you want to delete this comment? 
 
-                                <form action="/home" method="POST" class="pull-right">
+                                <form action="/public/comments/<?php echo $number; ?>" method="POST" class="pull-right">
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="function" value="Delete">
-                                    <input type="hidden" name="post_id" value="<?php echo $number; ?>">
+                                    <input type="hidden" name="comment_id" value="<?php echo $number; ?>">
                                     <input type="hidden" name="title" value="<?php echo $titleValue; ?>">
 
 
@@ -42,18 +39,17 @@
                                         <i class="fa fa-btn fa-trash" title="delete"></i> confirm delete
                                     </button>
 
-                                    <a href="/public/article/edit/<?php echo $number; ?>" class="btn">
+                                    <a href="/public/comments/edit/<?php echo $number; ?>" class="btn">
                                         <i class="fa fa-btn fa-trash" title="delete"></i> cancel
                                     </a>
 
                                 </form>
                             </div>
                         @endif
-                    @endif
 
                     <div class="breadcrumb">
                         
-                        <a href="/">← back to overview</a>
+                        <a href="/public/comments/<?php echo $number; ?>/">← back to overview</a>
 
                     </div>
                     

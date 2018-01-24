@@ -46,6 +46,33 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/home', function () {
         return view('home');
     });
+
+
+    // COMMENTS
+    Route::get('/public/comments/{post}', function($post)
+    {
+        return View::make('comment', array('postID' => $post));
+    });
+
+    Route::get('/public/comments/{post}', function($post)
+    {
+        return View::make('comment', array('postID' => $post));
+    });
+
+    Route::get('/public/comments/edit/{comment}', function($comment)
+    {
+        return View::make('comment', array('number' => $comment));
+    });
+
+    Route::get('/public/comments/delete/{comment}', function($comment)
+    {
+        return View::make('comment', array('number' => $comment));
+    });
+
+
+
+
+    // ARTICLE
     Route::post('/article/add', function()
     {
         return view('article.add');
@@ -65,6 +92,7 @@ Route::group(['middleware' => 'auth'], function () {
     {
         return View::make('article', array('title' => 'Edit', 'delete' => 'no', 'link' => '/article/edit', 'number' => $post));
     });
+
     Route::get('/public/article/delete/{post}', function($post)
     {
         return View::make('article', array('title' => 'Edit', 'delete' => 'yes', 'number' => $post));

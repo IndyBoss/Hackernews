@@ -2,20 +2,15 @@
 
 @section('content')
 
-<?php $postedById = 0; ?>
-
-
-@if (null !== Auth::user())
-    @if ($postedById = Auth::user()->id)
-    @endif
-@endif
-
-
-
-
 <?php
 
 $MSG = "";
+$commentCounter = "";
+$postID ="";
+
+if (null !== Auth::user()) {
+    $postedById = Auth::user()->id;
+}
 
 if (isset($_POST['function'])) {
     if($_POST['function'] =='Add'){
@@ -59,6 +54,7 @@ if (isset($_POST['function'])) {
     if($_POST['function'] == 'Delete'){
         $postID = $_POST['post_id'];
         $button = $_POST['button'];
+        $title = $_POST['title'];
         if($button == 'delete') {
             try 
             {
@@ -80,7 +76,7 @@ if (isset($_POST['function'])) {
 
     session_start();
     $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-    $sql = 'SELECT * FROM posts';
+    $sql = 'SELECT * FROM posts ORDER BY title';
 ?>
 
 
@@ -99,7 +95,13 @@ if (isset($_POST['function'])) {
                     <ul class="article-overview">
 
                 <?php foreach ( $conn->query($sql) as $post): 
-                
+                    $postID = $post['post_id'];
+
+                $commentsql = "SELECT COUNT(comment_id) FROM comments WHERE post_id = '$postID'";
+                    $result = $conn->prepare($commentsql); 
+                    $result->execute(); 
+                    $commentCounter = $result->fetchColumn(); 
+
                 $usersql = 'SELECT * FROM users WHERE id=' . $post['user_id'];
 
                     foreach ( $conn->query($usersql) as $user){
@@ -131,7 +133,7 @@ if (isset($_POST['function'])) {
                             <a href="<?= $post['url'] ?>" class="urlTitle"><?= $post['title'] ?></a>
                             @if (null !== Auth::user())
                                 @if ($postedById == Auth::user()->id)
-                                <a href="/public/article/edit/<?php echo $post['post_id'];?>" class="btn btn-primary btn-xs edit-btn">edit</a>
+                                <a href="/public/article/edit/<?php echo $postID;?>" class="btn btn-primary btn-xs edit-btn">edit</a>
                                 @endif
                             @endif
 
@@ -139,7 +141,7 @@ if (isset($_POST['function'])) {
                         
                         
                         <div class="info">
-                            2 points  | posted by <?php echo $postedBy ?> | <a href="comments/2">1 comment</a>
+                            2 points  | posted by <?php echo $postedBy ?> | <a href="/public/comments/<?php echo $postID;?>"><?php echo $commentCounter;?> comment</a>
                         </div>
                     
                     </li>
