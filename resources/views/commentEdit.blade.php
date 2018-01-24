@@ -4,8 +4,8 @@
 
     <?php
 
-    $titleValue = "";
-    $urlValue = "";
+    $body = "";
+    $postId = "";
     $postedByID = Auth::user()->id;
 
 
@@ -13,9 +13,9 @@
         $sql = 'SELECT * FROM comments WHERE comment_id=' . $number;
 
         foreach ($conn->query($sql) as $row) {
-            $titleValue =  $row['title'];
-            $urlValue = $row['url'];
+            $body =  $row['comment'];
             $postedByID = $row['user_id'];
+            $postId = $row['post_id'];
         }
 
     ?>
@@ -28,11 +28,10 @@
                             <div class="bg-danger clearfix">             
                                 Are you sure you want to delete this comment? 
 
-                                <form action="/public/comments/<?php echo $number; ?>" method="POST" class="pull-right">
+                                <form action="/public/comments/<?php echo $postId; ?>" method="POST" class="pull-right">
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="function" value="Delete">
                                     <input type="hidden" name="comment_id" value="<?php echo $number; ?>">
-                                    <input type="hidden" name="title" value="<?php echo $titleValue; ?>">
 
 
                                     <button name="button" class="btn btn-danger" value="delete">
@@ -49,18 +48,15 @@
 
                     <div class="breadcrumb">
                         
-                        <a href="/public/comments/<?php echo $number; ?>/">← back to overview</a>
+                        <a href="/public/comments/<?php echo $postId; ?>">← back to overview</a>
 
                     </div>
                     
                     <div class="panel panel-default">
                         <div class="panel-heading clearfix">
-                            <?php echo $title; ?> article
-                            @if($title == 'Edit')
-                                <a href="/public/article/delete/<?php if($title == 'Edit') {echo $number;}?>" class="btn btn-danger btn-xs pull-right">
-                                    <i class="fa fa-btn fa-trash" title="delete"></i> delete article
+                                <a href="/public/comments/delete/<?php echo $number;?>" class="btn btn-danger btn-xs pull-right">
+                                    <i class="fa fa-btn fa-trash" title="delete"></i> delete comment
                                 </a>
-                            @endif
                         </div>
 
                         <div class="panel-content">
@@ -68,37 +64,25 @@
                             
 
                             <!-- New Task Form -->
-                            <form action="/home" method="POST" class="form-horizontal">
+                            <form action="/public/comments/<?php echo $postId ?>" method="POST" class="form-horizontal">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="function" value="<?php echo $title; ?>">
-                                <input type="hidden" name="post_id" value="<?php if($title == 'Edit') {echo $number;}?>>">
-
+                                <input type="hidden" name="comment_id" value="<?php echo $number ?>">
+                                <input type="hidden" name="function" value="Edit">
 
                                 <!-- Article data -->
                                 <div class="form-group">
-                                    <label for="article-title" class="col-sm-3 control-label">Title (max. 255 characters)</label>
+                                    <label for="body" class="col-sm-3 control-label">Comment</label>
 
                                     <div class="col-sm-6">
-                                        <input type="text" name="title" id="article-title" class="form-control" value="<?php if($title == 'Edit') {echo $titleValue;}?>">
+                                        <textarea type="text" name="body" id="body" class="form-control"><?php echo $body ?></textarea>
                                     </div>
                                 </div>
-
-                                
-                                <!-- Article url -->
-                                <div class="form-group">
-                                    <label for="article-url" class="col-sm-3 control-label">URL</label>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" name="url" id="article-url" class="form-control" value="<?php if($title == 'Edit') {echo $urlValue;}?>">
-                                    </div>
-                                </div>
-
 
                                 <!-- Add Article Button -->
                                 <div class="form-group">
                                     <div class="col-sm-offset-3 col-sm-6">
                                         <button type="submit" class="btn btn-default">
-                                            <?php echo $title;?> Article
+                                            <i class="fa fa-pencil-square-o"></i> edit comment
                                         </button>
                                     </div>
                                 </div>
@@ -111,6 +95,6 @@
             </div>
         </div>
     @else
-    <h1>This is not your article.</h>
+    <h1>This is not your comment.</h>
     @endif
 @endsection
