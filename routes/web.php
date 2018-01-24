@@ -73,16 +73,6 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     // ARTICLE
-    /*Route::post('/article/add', function()
-    {
-        return view('article.add');
-    });
-
-    Route::post('/article/edit', function()
-    {
-        return view('article.edit');
-    });/*µµ*/
-
     Route::get('/public/article/add', function()
     {
         return View::make('article', array('title' => 'Add','link' => '/article/add'));

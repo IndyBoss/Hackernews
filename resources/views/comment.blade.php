@@ -2,117 +2,97 @@
 
 @section('content')
 
-<?php
+    <?php
 
-$MSG = "";
-$title ="";
-$url ="";
-$postedByID ="";
-$commentCounter ="";
-$name ="";
-$text ="";
-$DEL ="";
-$commentName = "";
-$dateToPost = date('Y-m-d H:i:s');
-$userIdToPost = Auth::user()->id;
+        $MSG = "";
+        $title ="";
+        $url ="";
+        $postedByID ="";
+        $commentCounter ="";
+        $name ="";
+        $text ="";
+        $DEL ="";
+        $commentName = "";
+        $dateToPost = date('Y-m-d H:i:s');
+        $userIdToPost = Auth::user()->id;
 
-if(isset($_POST['DEL'])) {
-    $DEL = $_POST['DEL'];
-}
-
-
-$conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-
-    $postSql = "SELECT * FROM posts WHERE post_id = '$postID' ";
-    foreach ( $conn->query($postSql) as $post){
-        $title =  $post['title'];
-        $url =  $post['url'];
-        $postedByID = $post['user_id'];
-    }
-
-    $usersSql = "SELECT name FROM users WHERE id = '$postedByID'";
-        $result = $conn->prepare($usersSql); 
-        $result->execute(); 
-        $name = $result->fetchColumn();
-
-
-    
-
-
-    // *********************************************************************************** //
-    // ********************************ADD - DELETE - EDIT******************************** //
-    // *********************************************************************************** //
-    // *********************************************************************************** //
-
-    if (isset($_POST['function'])) {
-        if($_POST['function'] =='Add'){
-            $body = $_POST['body'];
-            $bodyReplaced = str_replace("'", "''", $body);
-            try 
-            {
-                $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $sql = "INSERT INTO comments (comment, post_id, user_id, created_at) VALUES ('$bodyReplaced', '$postID', '$userIdToPost', '$dateToPost')";
-                $conn->exec($sql);
-                $MSG = "Comment created succesfully.";
-            }
-            catch(PDOException $e)
-            {
-                $MSG = "Coment failed creating. " . $e->getMessage() . "";
-            }
-    
-            $conn = null;
-        }
-        if($_POST['function'] =='Edit'){
-            $bodyToEdit = $_POST['body'];
-            $bodyReplaced = str_replace("'", "''", $bodyToEdit);
-            $ID = $_POST['comment_id'];
-            try 
-            {
-                $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $sql = "UPDATE comments SET comment = '$bodyReplaced' WHERE comment_id = '$ID' ";
-                $conn->exec($sql);
-                $MSG = "Comment edited succesfully.";
-            }
-            catch(PDOException $e)
-            {
-                $MSG = "Comment failed editing. " . $e->getMessage() . "";
-            }
-    
-            $conn = null;
-        }
-        if($_POST['function'] == 'Delete'){
-            $ID = $_POST['comment_id'];
-            try
-            {
-                $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-                $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $sql = "DELETE FROM comments WHERE comment_id = '$ID' ";
-                $conn->exec($sql);
-                $MSG = "Comment deleted succesfully.";
-            }
-            catch(PDOException $e)
-            {
-                $MSG = "Comment failed deleting. " . $e->getMessage() . "";
-            }
-    
-            $conn = null;
-            }
+        if(isset($_POST['DEL'])) {
+            $DEL = $_POST['DEL'];
         }
 
-    // *********************************************************************************** //
-    // ***********************************COMMENT COUNT*********************************** //
-    // *********************************************************************************** //
-    // *********************************************************************************** //
+            $posts = DB::select("SELECT * FROM posts WHERE post_id = '$postID' ");
+                foreach ($posts as $post){
+                    $title =  $post->title;
+                    $url =  $post->url;
+                    $postedByID = $post->user_id;
+                }
 
-    $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-    $commentCountSql = "SELECT COUNT(comment_id) FROM comments WHERE post_id = '$postID'";
-        $result = $conn->prepare($commentCountSql); 
-        $result->execute(); 
-        $commentCounter = $result->fetchColumn();
 
-?>
+            $users = DB::select("SELECT name FROM users WHERE id = '$postedByID'");
+                foreach ($users as $user){
+                    $name =  $user->name;
+                }
+
+
+            
+
+
+            // *********************************************************************************** //
+            // ********************************ADD - DELETE - EDIT******************************** //
+            // *********************************************************************************** //
+            // *********************************************************************************** //
+
+            if (isset($_POST['function'])) {
+                if($_POST['function'] =='Add'){
+                    $body = $_POST['body'];
+                    $bodyReplaced = str_replace("'", "''", $body);
+                    try {
+                        DB::insert("INSERT INTO comments (comment, post_id, user_id, created_at) VALUES ('$bodyReplaced', '$postID', '$userIdToPost', '$dateToPost')");
+                        DB::commit();
+                        $MSG = "Comment created succesfully.";
+                    } catch (\Exception $e) {
+                        DB::rollback();
+                        $MSG = "Coment failed creating. " . $e->getMessage() . "";
+                    }
+                }
+                if($_POST['function'] =='Edit'){
+                    $bodyToEdit = $_POST['body'];
+                    $bodyReplaced = str_replace("'", "''", $bodyToEdit);
+                    $ID = $_POST['comment_id'];
+                    try {
+                        DB::update("UPDATE comments SET comment = '$bodyReplaced' WHERE comment_id = '$ID' ");
+                        DB::commit();
+                        $MSG = "Comment edited succesfully.";
+                    } catch (\Exception $e) {
+                        DB::rollback();
+                        $MSG = "Comment failed editing. " . $e->getMessage() . "";
+                    }
+                }
+                if($_POST['function'] == 'Delete'){
+                    $ID = $_POST['comment_id'];
+                    try {
+                        DB::delete("DELETE FROM comments WHERE comment_id = '$ID' ");
+                        DB::commit();
+                        $MSG = "Comment deleted succesfully.";
+                    } catch (\Exception $e) {
+                        DB::rollback();
+                        $MSG = "Comment failed deleting. " . $e->getMessage() . "";
+                    }
+                }
+            }
+
+            // *********************************************************************************** //
+            // ***********************************COMMENT COUNT*********************************** //
+            // *********************************************************************************** //
+            // *********************************************************************************** //
+
+
+                $commentsCounters = DB::select("SELECT COUNT(comment_id) as count FROM comments WHERE post_id = '$postID'");
+                    foreach ($commentsCounters as $commentCounter) {
+                        $commentCounter = $commentCounter->count;
+                    }
+
+    ?>
 
     <div class="container">
         <div class="row">
@@ -186,19 +166,18 @@ $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
                                 <ul>
                                     <?php
 
-                                        $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-                                        $commentsSql = "SELECT * FROM comments WHERE post_id = '$postID' "; ?>
+                                        $comments = DB::select("SELECT * FROM comments WHERE post_id = '$postID' "); ?>
 
-                                        @foreach ( $conn->query($commentsSql) as $comment)
-                                            <?php $text =  $comment['comment'];
-                                            $date =  $comment['created_at'];
-                                            $userID = $comment['user_id'];
-                                            $commentID = $comment['comment_id'];
+                                        @foreach ( $comments as $comment)
+                                            <?php $text =  $comment->comment;
+                                            $date =  $comment->created_at;
+                                            $userID = $comment->user_id;
+                                            $commentID = $comment->comment_id;
 
-                                                $usersSql = "SELECT name FROM users WHERE id = '$userID'";
-                                                $result = $conn->prepare($usersSql); 
-                                                $result->execute(); 
-                                                $commentName = $result->fetchColumn();
+                                                $usersName = DB::select("SELECT name FROM users WHERE id = '$userID'");
+                                                    foreach ($usersName as $userName) {
+                                                        $commentName = $userName->name;
+                                                    }
                                             ?>
 
 
@@ -206,7 +185,7 @@ $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
                                                 <div class='comment-info'>
                                                     Posted by <?php echo $commentName ?> on <?php echo $date ?>.
                                                 
-                                                    @if ($userID == Auth::user()->id) 
+                                                    @if($userID == Auth::user()->id) 
                                                         <a href='/public/comments/edit/<?php echo $commentID ?>' class='btn btn-primary btn-xs edit-btn'>edit</a>
 
                                                         <form action='/public/comments/<?php echo $postID ?>' method='POST' class='btn btn-danger btn-xs edit-btn'>

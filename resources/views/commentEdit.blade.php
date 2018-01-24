@@ -8,15 +8,12 @@
     $postId = "";
     $postedByID = Auth::user()->id;
 
-
-        $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-        $sql = 'SELECT * FROM comments WHERE comment_id=' . $number;
-
-        foreach ($conn->query($sql) as $row) {
-            $body =  $row['comment'];
-            $postedByID = $row['user_id'];
-            $postId = $row['post_id'];
-        }
+        $comments = DB::select("SELECT * FROM comments WHERE comment_id='$number'");
+            foreach ($comments as $comment) {
+                $body =  $comment->comment;
+                $postedByID = $comment->user_id;
+                $postId = $comment->post_id;
+            } 
 
     ?>
 

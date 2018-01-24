@@ -10,13 +10,12 @@
 
     if($title == 'Edit') {
 
-        $conn = new PDO( 'mysql:host=localhost;dbname=hackernews', 'Indy', 'Indy' );
-        $sql = 'SELECT * FROM posts WHERE post_id=' . $number;
+        $posts = DB::select("SELECT * FROM posts WHERE post_id='$number'");
 
-        foreach ($conn->query($sql) as $row) {
-            $titleValue =  $row['title'];
-            $urlValue = $row['url'];
-            $postedByID = $row['user_id'];
+        foreach ($posts as $row) {
+            $titleValue =  $row->title;
+            $urlValue = $row->url;
+            $postedByID = $row->user_id;
         }
     }
 
@@ -75,7 +74,7 @@
                             <form action="/home" method="POST" class="form-horizontal">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="function" value="<?php echo $title; ?>">
-                                <input type="hidden" name="post_id" value="<?php if($title == 'Edit') {echo $number;}?>>">
+                                <input type="hidden" name="post_id" value="<?php if($title == 'Edit') {echo $number;}?>">
 
 
                                 <!-- Article data -->
