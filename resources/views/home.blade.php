@@ -122,7 +122,7 @@
                         <ul class="article-overview">
 
                     <?php 
-                    $postResults = DB::select('SELECT * FROM posts WHERE deleted_at IS NULL ORDER BY created_at');
+                    $postResults = DB::select('SELECT * FROM posts WHERE deleted_at IS NULL ORDER BY points DESC');
                     foreach($postResults as $postResult) {
                         $voteCounter = $postResult->points;
                         $postedID = $postResult->post_id;
