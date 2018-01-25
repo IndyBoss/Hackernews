@@ -19,10 +19,6 @@ Route::get('/public', function () {
     return view('home');
 });
 
-Route::get('/public/instructies', function () {
-    return view('instructies');
-});
-
 Route::get('/public/article/add', function () {
     return view('article-add');
 })->middleware('auth');
