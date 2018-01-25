@@ -48,9 +48,8 @@
             if (isset($_POST['function'])) {
                 if($_POST['function'] =='Add'){
                     $body = $_POST['body'];
-                    $bodyReplaced = str_replace("'", "''", $body);
                     try {
-                        DB::insert("INSERT INTO comments (comment, post_id, user_id, created_at) VALUES ('$bodyReplaced', '$postID', '$userIdToPost', '$dateToPost')");
+                        DB::insert("INSERT INTO comments (comment, post_id, user_id, created_at) VALUES ('$body', '$postID', '$userIdToPost', '$dateToPost')");
                         DB::commit();
                         $MSG = "Comment created succesfully.";
                     } catch (\Exception $e) {
@@ -73,14 +72,61 @@
                 }
                 if($_POST['function'] == 'Delete'){
                     $ID = $_POST['comment_id'];
+                    $dateToPost = date('Y-m-d H:i:s');
                     try {
-                        DB::delete("DELETE FROM comments WHERE comment_id = '$ID' ");
+                        DB::update("UPDATE comments SET deleted_at = '$dateToPost' WHERE comment_id = '$ID' ");
                         DB::commit();
                         $MSG = "Comment deleted succesfully.";
                     } catch (\Exception $e) {
                         DB::rollback();
                         $MSG = "Comment failed deleting. " . $e->getMessage() . "";
                     }
+                }
+                if($_POST['function'] == 'Vote'){
+                    $vote = 0;
+                    $postID = $_POST['post_id'];
+                    $pointsToPost = 0;
+                    $postPoints = 0;
+                    
+                    if($_POST['vote'] == 'up'){
+                        $vote = 1;
+                    }
+                    else {
+                        $vote = 0-1;
+                    }
+        
+        
+                    $results = DB::select("SELECT COUNT(vote) as count FROM votes WHERE post_id= '$postID' AND user_id = '$userIdToPost' ");
+                        foreach($results as $result){
+                            $r = $result->count;
+                            if($r == 0){
+                                try {
+                                    DB::insert("INSERT INTO votes (vote, user_id, post_id) VALUES ('$vote', '$userIdToPost', '$postID')");
+                                    DB::commit();
+                                    $MSG = "Voted succesfully.";
+                                } catch (\Exception $e) {
+                                    DB::rollback();
+                                    $MSG = "Voting failed. " . $e->getMessage() . "";
+                                }
+                            }
+                            else {
+                                try {
+                                    DB::update("UPDATE votes SET vote = '$vote' WHERE post_id = '$postID' AND user_id = '$userIdToPost' ");
+                                    DB::commit();
+                                    $MSG = "Vote updated succesfully.";
+                                } catch (\Exception $e) {
+                                    DB::rollback();
+                                    $MSG = "Vote failed updating. " . $e->getMessage() . "";
+                                }
+                            }
+                            $points = DB::select("SELECT SUM(vote) as sum FROM votes WHERE post_id= '$postID' ");
+                                foreach($points as $point) {
+                                    $postPoints = $point->sum;
+                                    $pointsToPost = $postPoints;
+                                }
+                            DB::update("UPDATE posts SET points = '$pointsToPost' WHERE post_id = '$postID' ");
+                            DB::commit();
+                        }
                 }
             }
 
@@ -90,10 +136,38 @@
             // *********************************************************************************** //
 
 
-                $commentsCounters = DB::select("SELECT COUNT(comment_id) as count FROM comments WHERE post_id = '$postID'");
+                $commentsCounters = DB::select("SELECT COUNT(comment_id) as count FROM comments WHERE post_id = '$postID' AND deleted_at IS NULL");
                     foreach ($commentsCounters as $commentCounter) {
                         $commentCounter = $commentCounter->count;
                     }
+
+
+                            if(null !== Auth::user()) {
+                                $userVotes = DB::select("SELECT vote, user_id FROM votes WHERE post_id = '$postID'");
+                                foreach ($userVotes as $userVote) {
+                                    $votedUser = $userVote->vote;
+                                    $userID = $userVote->user_id;
+                                    
+                                    if($votedUser != 0) {
+                                        if ($userID == Auth::user()->id){
+                                            if($votedUser == 1) {
+                                                $voted = 'up';
+                                            }
+                                            elseif($votedUser == -1) {
+                                                $voted = 'down';
+                                            }
+                                            else {$voted = '';}
+                                        }
+                                        else {$voted = '';}
+                                    }
+                                }
+                            }
+
+
+             $postResults = DB::select("SELECT SUM(points) as p FROM posts WHERE post_id = '$postID' AND deleted_at IS NULL");
+                foreach($postResults as $postResult) {
+                    $voteCounter = $postResult->p;
+                }
 
     ?>
 
@@ -136,25 +210,48 @@
                     <div class="panel-heading clearfix"><?php echo $title ?></div>
                         <div class="panel-content">
 
-                            <div class="vote">                   
-                                <form action="/public/vote/up" method="POST" class="form-inline upvote">
-                                    <input type="hidden" name="_token" value="qF7UhzckMPKOUI22oV5f767oTXIXdfLCLCtqmhJR">
+                                @if(null !== Auth::user())
+                                    <form action='/public/comments/<?php echo $postID ?>' method='POST' class='vote'>
+                                        <input type='hidden' name='_token' value='{{ csrf_token() }}'>
+                                        <input type='hidden' name='function' value='Vote'>
+                                        <input type='hidden' name='post_id' value="<?php echo $postID; ?>">
+                            
+                                        @if($voted == 'up')
+                                            <i class='fa fa-btn fa-caret-up disabled upvote' title='You can only upvote once'></i>
+                                        @else
+                                            <button name='vote' class='form-inline upvote' value='up'>
+                                                <i class='fa fa-btn fa-caret-up upvote' title='upvote'></i>
+                                            </button>
+                                        @endif
 
-                                    <button name="article_id" value="1">
-                                        <i class="fa fa-btn fa-caret-up" title="upvote"></i>
-                                    </button>
+                                        @if($voted == 'down')
+                                            <i class='fa fa-btn fa-caret-down disabled downvote' title='You can only downvote once'></i>
+                                        @else
+                                            <button name='vote' class='form-inline downvote' value='down'>
+                                                <i class='fa fa-btn fa-caret-down downvote' title='downvote'></i>
+                                            </button>
+                                        @endif
 
-                                </form>
-                                        
-                                <form action="/public/vote/down" method="POST" class="form-inline downvote">
-                                    <input type="hidden" name="_token" value="qF7UhzckMPKOUI22oV5f767oTXIXdfLCLCtqmhJR">
+                                    </form>
+                                
+                                    @else
+                                        <div class='vote'>
+                                
+                                            <div class='form-inline upvote'>
 
-                                    <button name="article_id" value="1">
-                                        <i class="fa fa-btn fa-caret-down" title="downvote"></i>
-                                    </button>
+                                                <i class='fa fa-btn fa-caret-up disabled upvote' title='You need to be logged in to upvote'></i>
+                                            
+                                            </div>
+                        
+                                            <div class='form-inline upvote'>
 
-                                </form>   
-                            </div>
+                                                <i class='fa fa-btn fa-caret-down disabled downvote' title='You need to be logged in to downvote'></i>
+                                            
+                                            </div>
+
+                                        </div>
+                                    @endif
+
                                 
                             <div class="url">
                                 <a href="<?php echo $url ?>" class="urlTitle"><?php echo $title ?></a>
@@ -162,14 +259,14 @@
                                 
                                 
                             <div class="info">
-                                2 points  | posted by <?php echo $name ?> | <?php echo $commentCounter ?> comments
+                                <?php echo $voteCounter ?> points  | posted by <?php echo $name ?> | <?php echo $commentCounter ?> comments
                             </div>
 
                             <div class="comments">
                                 <ul>
                                     <?php
 
-                                        $comments = DB::select("SELECT * FROM comments WHERE post_id = '$postID' "); ?>
+                                        $comments = DB::select("SELECT * FROM comments WHERE post_id = '$postID' AND deleted_at IS NULL"); ?>
 
                                         @foreach ( $comments as $comment)
                                             <?php $text =  $comment->comment;

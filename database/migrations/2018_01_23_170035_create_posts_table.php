@@ -18,6 +18,8 @@ class CreatePostsTable extends Migration
             $table->string('title');
             $table->string('url');
             $table->integer('user_id')->unsigned();
+            $table->integer('points')->default('0');
+            $table->softDeletes();
             $table->timestamps();
         });
 

@@ -15,6 +15,10 @@ Route::get('/public/home', function () {
     return view('home');
 });
 
+Route::post('/public/home', function () {
+    return view('home');
+});
+
 Route::get('/public', function () {
     return view('home');
 });
