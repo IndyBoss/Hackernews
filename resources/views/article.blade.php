@@ -52,7 +52,7 @@
 
                     <div class="breadcrumb">
                         
-                        <a href="/">← back to overview</a>
+                        <a href="/home">← back to overview</a>
 
                     </div>
                     
