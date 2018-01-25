@@ -14,6 +14,7 @@
         $DEL ="";
         $commentName = "";
         $dateToPost = date('Y-m-d H:i:s');
+        $voted = "";
 
         if(null !== Auth::user()) {
             $userIdToPost = Auth::user()->id;
@@ -156,10 +157,18 @@
                                             elseif($votedUser == -1) {
                                                 $voted = 'down';
                                             }
-                                            else {$voted = '';}
+                                            else {
+                                                $voted = '';
+                                            }
                                         }
-                                        else {$voted = '';}
+                                        else {
+                                            $voted = '';
+                                        }
                                     }
+                                    
+                                }
+                                if($postedByID == Auth::user()->id) {
+                                    $voted = 'both';
                                 }
                             }
 
@@ -210,48 +219,59 @@
                     <div class="panel-heading clearfix"><?php echo $title ?></div>
                         <div class="panel-content">
 
-                                @if(null !== Auth::user())
+                            @if(null !== Auth::user())
                                     <form action='/public/comments/<?php echo $postID ?>' method='POST' class='vote'>
                                         <input type='hidden' name='_token' value='{{ csrf_token() }}'>
                                         <input type='hidden' name='function' value='Vote'>
                                         <input type='hidden' name='post_id' value="<?php echo $postID; ?>">
                             
-                                        @if($voted == 'up')
-                                            <i class='fa fa-btn fa-caret-up disabled upvote' title='You can only upvote once'></i>
-                                        @else
-                                            <button name='vote' class='form-inline upvote' value='up'>
-                                                <i class='fa fa-btn fa-caret-up upvote' title='upvote'></i>
-                                            </button>
-                                        @endif
+                                        @if($voted == 'both')
+                                            <div class="vote">                    
+                                                <div class="form-inline upvote">
+                                                    <i class="fa fa-btn fa-caret-up disabled upvote" title="can't upvote your own articles"></i>
+                                                </div>
 
-                                        @if($voted == 'down')
-                                            <i class='fa fa-btn fa-caret-down disabled downvote' title='You can only downvote once'></i>
+                                                <div class="form-inline downvote">
+                                                    <i class="fa fa-btn fa-caret-down disabled" title="can't downvote your own articles"></i>
+                                                </div>
+                                            </div>
                                         @else
-                                            <button name='vote' class='form-inline downvote' value='down'>
-                                                <i class='fa fa-btn fa-caret-down downvote' title='downvote'></i>
-                                            </button>
+                                            @if($voted == 'up')
+                                                <i class='fa fa-btn fa-caret-up disabled upvote' title='You can only upvote once'></i>
+                                            @else
+                                                <button name='vote' class='form-inline upvote' value='up'>
+                                                    <i class='fa fa-btn fa-caret-up upvote' title='upvote'></i>
+                                                </button>
+                                            @endif
+
+                                            @if($voted == 'down')
+                                                <i class='fa fa-btn fa-caret-down disabled downvote' title='You can only downvote once'></i>
+                                            @else
+                                                <button name='vote' class='form-inline downvote' value='down'>
+                                                    <i class='fa fa-btn fa-caret-down downvote' title='downvote'></i>
+                                                </button>
+                                            @endif
                                         @endif
 
                                     </form>
                                 
-                                    @else
-                                        <div class='vote'>
-                                
-                                            <div class='form-inline upvote'>
+                                @else
+                                    <div class='vote'>
+                            
+                                        <div class='form-inline upvote'>
 
-                                                <i class='fa fa-btn fa-caret-up disabled upvote' title='You need to be logged in to upvote'></i>
-                                            
-                                            </div>
-                        
-                                            <div class='form-inline upvote'>
-
-                                                <i class='fa fa-btn fa-caret-down disabled downvote' title='You need to be logged in to downvote'></i>
-                                            
-                                            </div>
-
+                                            <i class='fa fa-btn fa-caret-up disabled upvote' title='You need to be logged in to upvote'></i>
+                                        
                                         </div>
-                                    @endif
+                    
+                                        <div class='form-inline upvote'>
 
+                                            <i class='fa fa-btn fa-caret-down disabled downvote' title='You need to be logged in to downvote'></i>
+                                        
+                                        </div>
+
+                                    </div>
+                                @endif
                                 
                             <div class="url">
                                 <a href="<?php echo $url ?>" class="urlTitle"><?php echo $title ?></a>

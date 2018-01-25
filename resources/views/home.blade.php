@@ -126,6 +126,7 @@
                     foreach($postResults as $postResult) {
                         $voteCounter = $postResult->points;
                         $postedID = $postResult->post_id;
+                        $userPosted = $postResult->user_id;
                         $voted = "";
 
                             if(null !== Auth::user()) {
@@ -142,12 +143,21 @@
                                             elseif($votedUser == -1) {
                                                 $voted = 'down';
                                             }
-                                            else {$voted = '';}
+                                            else {
+                                                $voted = '';
+                                            }
                                         }
-                                        else {$voted = '';}
+                                        else {
+                                            $voted = '';
+                                        }
                                     }
+                                    
+                                }
+                                if($userPosted == Auth::user()->id) {
+                                    $voted = 'both';
                                 }
                             }
+                            
 
                         $comments = DB::select("SELECT COUNT(comment_id) as count FROM comments WHERE post_id = '$postResult->post_id' AND deleted_at IS NULL");
                         foreach ($comments as $comment) {
@@ -169,20 +179,32 @@
                                     <input type='hidden' name='function' value='Vote'>
                                     <input type='hidden' name='post_id' value="<?php echo $postedID; ?>">
                         
-                                    @if($voted == 'up')
-                                        <i class='fa fa-btn fa-caret-up disabled upvote' title='You can only upvote once'></i>
-                                    @else
-                                        <button name='vote' class='form-inline upvote' value='up'>
-                                            <i class='fa fa-btn fa-caret-up upvote' title='upvote'></i>
-                                        </button>
-                                    @endif
+                                    @if($voted == 'both')
+                                        <div class="vote">                    
+                                            <div class="form-inline upvote">
+                                                <i class="fa fa-btn fa-caret-up disabled upvote" title="can't upvote your own articles"></i>
+                                            </div>
 
-                                    @if($voted == 'down')
-                                        <i class='fa fa-btn fa-caret-down disabled downvote' title='You can only downvote once'></i>
+                                            <div class="form-inline downvote">
+                                                <i class="fa fa-btn fa-caret-down disabled" title="can't downvote your own articles"></i>
+                                            </div>
+                                        </div>
                                     @else
-                                        <button name='vote' class='form-inline downvote' value='down'>
-                                            <i class='fa fa-btn fa-caret-down downvote' title='downvote'></i>
-                                        </button>
+                                        @if($voted == 'up')
+                                            <i class='fa fa-btn fa-caret-up disabled upvote' title='You can only upvote once'></i>
+                                        @else
+                                            <button name='vote' class='form-inline upvote' value='up'>
+                                                <i class='fa fa-btn fa-caret-up upvote' title='upvote'></i>
+                                            </button>
+                                        @endif
+
+                                        @if($voted == 'down')
+                                            <i class='fa fa-btn fa-caret-down disabled downvote' title='You can only downvote once'></i>
+                                        @else
+                                            <button name='vote' class='form-inline downvote' value='down'>
+                                                <i class='fa fa-btn fa-caret-down downvote' title='downvote'></i>
+                                            </button>
+                                        @endif
                                     @endif
 
                                 </form>
