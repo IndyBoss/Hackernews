@@ -14,7 +14,10 @@
         $DEL ="";
         $commentName = "";
         $dateToPost = date('Y-m-d H:i:s');
-        $userIdToPost = Auth::user()->id;
+
+        if(null !== Auth::user()) {
+            $userIdToPost = Auth::user()->id;
+        }
 
         if(isset($_POST['DEL'])) {
             $DEL = $_POST['DEL'];
@@ -184,18 +187,19 @@
                                             <li><div class='comment-body'><?php echo $text ?></div>
                                                 <div class='comment-info'>
                                                     Posted by <?php echo $commentName ?> on <?php echo $date ?>.
-                                                
-                                                    @if($userID == Auth::user()->id) 
-                                                        <a href='/public/comments/edit/<?php echo $commentID ?>' class='btn btn-primary btn-xs edit-btn'>edit</a>
+                                                    @if (null !== Auth::user())
+                                                        @if($userID == Auth::user()->id) 
+                                                            <a href='/public/comments/edit/<?php echo $commentID ?>' class='btn btn-primary btn-xs edit-btn'>edit</a>
 
-                                                        <form action='/public/comments/<?php echo $postID ?>' method='POST' class='btn btn-danger btn-xs edit-btn'>
-                                                            <input type='hidden' name='_token' value='{{ csrf_token() }}'>
-                                                            <input type='hidden' name='DEL' value='pushed'>
-                                                            <input type='hidden' name='ID' value='<?php echo $commentID ?>'>
-                                                            <button name='button' value='delete'>
-                                                                <i class='fa fa-btn fa-trash' title='delete'></i> delete
-                                                            </button>
-                                                        </form>
+                                                            <form action='/public/comments/<?php echo $postID ?>' method='POST' class='btn btn-danger btn-xs edit-btn'>
+                                                                <input type='hidden' name='_token' value='{{ csrf_token() }}'>
+                                                                <input type='hidden' name='DEL' value='pushed'>
+                                                                <input type='hidden' name='ID' value='<?php echo $commentID ?>'>
+                                                                <button name='button' value='delete'>
+                                                                    <i class='fa fa-btn fa-trash' title='delete'></i> delete
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </li>
@@ -204,30 +208,35 @@
                             </div>
 
                                 
-                                
-                                <!-- New Task Form -->
-                            <form action="/public/comments/<?php echo $postID ?>" method="POST" class="form-horizontal">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="function" value="Add">
+                            @if (null !== Auth::user())
+                                    <!-- New Task Form -->
+                                <form action="/public/comments/<?php echo $postID ?>" method="POST" class="form-horizontal">
+                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="function" value="Add">
 
-                                <!-- Comment data -->
-                                <div class="form-group">
-                                    <label for="body" class="col-sm-3 control-label">Comment</label>
+                                    <!-- Comment data -->
+                                    <div class="form-group">
+                                        <label for="body" class="col-sm-3 control-label">Comment</label>
 
-                                    <div class="col-sm-6">
-                                        <textarea type="text" name="body" id="body" class="form-control"></textarea>
+                                        <div class="col-sm-6">
+                                            <textarea type="text" name="body" id="body" class="form-control"></textarea>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- Add comment -->
-                                <div class="form-group">
-                                    <div class="col-sm-offset-3 col-sm-6">
-                                        <button type="submit" class="btn btn-default">
-                                            <i class="fa fa-plus"></i> Add comment
-                                        </button>
+                                    <!-- Add comment -->
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-3 col-sm-6">
+                                            <button type="submit" class="btn btn-default">
+                                                <i class="fa fa-plus"></i> Add comment
+                                            </button>
+                                        </div>
                                     </div>
+                                </form>
+                            @else
+                                <div>   
+                                    <p>You need to be <a href="/login">logged in</a> to comment</p>
                                 </div>
-                            </form>
+                            @endif
                             
                         </div>
                     </div>

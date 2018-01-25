@@ -40,6 +40,12 @@ Route::get('/', function () {
 });
 
 
+Route::get('/public/comments/{post}', function($post)
+{
+    return View::make('comment', array('postID' => $post));
+});
+
+
 
 
 Route::group(['middleware' => 'auth'], function () {
@@ -49,10 +55,6 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     // COMMENTS
-    Route::get('/public/comments/{post}', function($post)
-    {
-        return View::make('comment', array('postID' => $post));
-    });
 
     Route::post('/public/comments/{post}', function($post)
     {
